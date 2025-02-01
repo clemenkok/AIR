@@ -56,11 +56,16 @@ def get_influential_papers(paper_id):
     details = fetch_paper_details(paper_id)
     if details is None:
         raise Exception("Not found")
-    influential_titles = []
+    influential_papers = []
     for reference in details.get("references", []):
         if reference.get("isInfluential", False):
-            influential_titles.append(reference.get("title", "No title"))
-    return influential_titles
+            influential_papers.append({
+                "title": reference.get("title", "Unknown"),
+                "url": reference.get("url", ""),
+                "paper_id": reference.get("paperId", None),
+                "year": reference.get("year", "N/A")
+            })
+    return influential_papers
 
 
 topic = "Gaussian Splatting"
