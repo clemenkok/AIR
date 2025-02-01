@@ -1,10 +1,21 @@
 import requests
 from collections import defaultdict
+from dataclasses import dataclass
 import matplotlib.pyplot as plt
 import networkx as nx
 
 # Semantic Scholar API endpoint
 BASE_URL = "https://api.semanticscholar.org/graph/v1/paper/search"
+
+@dataclass
+class Node:
+    name: str
+
+    def __repr__(self):
+        return self.name
+
+    def __hash__(self):
+        return hash(self.name)
 
 def find_most_relevant_paper(query: str, fields="title,url,year,citationCount") -> dict:
     """Search for the most relevant paper on a given topic using Semantic Scholar."""
@@ -68,10 +79,13 @@ def build_graph(knowledge_graph: dict, topic: str, depth: int = 1):
 
     most_relevant_paper = find_most_relevant_paper(topic)
     if most_relevant_paper:
-        print(most_relevant_paper)
+        node = Node(most_relevant_paper['title'])
         references = get_references(most_relevant_paper["paperId"])
+
         for ref in references:
-            knowledge_graph[most_relevant_paper['title']].append(ref['title'])
+            incoming_node = Node(ref['title'])
+
+            knowledge_graph[node].append(incoming_node)
             build_graph(knowledge_graph, ref['title'], depth - 1)
 
 def plot_citation_graph(citation_dict):
@@ -87,7 +101,7 @@ def plot_citation_graph(citation_dict):
     # Add edges from the dictionary
     for paper, citations in citation_dict.items():
         for cited_paper in citations:
-            G.add_edge(paper, cited_paper)
+            G.add_edge(paper.name, cited_paper.name)
     
     # Set figure size
     plt.figure(figsize=(12, 8))
@@ -114,11 +128,12 @@ def plot_citation_graph(citation_dict):
     plt.show()
 
 def prune_graph(graph, iterations):
-    
     for i in range(0, iterations):
-        degree_map = {node : 0 for node in graph}
+        degree_map = defaultdict(int)
+
         for node in graph:
             for endpoint in graph[node]:
+                print(endpoint)
                 degree_map[endpoint] += 1
         leaves = [node for node in graph if degree_map[node] == 1]
         for node in graph:
@@ -130,22 +145,26 @@ def prune_graph(graph, iterations):
 
 if __name__ == "__main__":
     knowledge_graph = {
-        "Gaussian Splatting for Real-Time Radiance Field Rendering": [
-            "Neural Radiance Fields (NeRF)", 
-            "Instant Neural Graphics Primitives", 
-            "Volumetric Scene Representations"
+        Node("Gaussian Splatting for Real-Time Radiance Field Rendering"): [
+            Node("Neural Radiance Fields (NeRF)"), 
+            Node("Instant Neural Graphics Primitives"), 
+            Node("Volumetric Scene Representations")
         ],
-        "Neural Radiance Fields (NeRF)": [
-            "Volume Rendering Techniques", 
-            "Photorealistic Scene Reconstruction"
+        Node("Neural Radiance Fields (NeRF)"): [
+            Node("Volume Rendering Techniques"), 
+            Node("Photorealistic Scene Reconstruction")
         ],
-        "Instant Neural Graphics Primitives": [
-            "Efficient 3D Scene Representations"
+        Node("Instant Neural Graphics Primitives"): [
+            Node("Efficient 3D Scene Representations")
         ]
     }
 
     topic = "Gaussian Splatting"
-    most_relevant_paper = find_most_relevant_paper(topic)
-    build_graph(knowledge_graph, topic)
-    print(knowledge_graph)
+    # most_relevant_paper = find_most_relevant_paper(topic)
+    # build_graph(knowledge_graph, topic)
+    # print(knowledge_graph)
     plot_citation_graph(knowledge_graph)
+
+    pruned_graph = knowledge_graph.copy()
+    prune_graph(pruned_graph, 1)
+    plot_citation_graph(pruned_graph)
