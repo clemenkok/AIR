@@ -15,7 +15,7 @@ def display_code_ide(code):
     
     container = st.container()
     with container:
-        col1, col2 = st.columns([2, 3])
+        col1, col2 = st.columns([1, 1])
         
         with col1:
             st.markdown("#### Code:")
@@ -28,3 +28,7 @@ def display_code_ide(code):
             st.text_area("", st.session_state.get("code_output", ""), height=400)
     
     return
+
+st.title("Knowledge Graph Viewer")
+code_snippet = fetch_code_snippet()
+display_code_ide(code_snippet)
