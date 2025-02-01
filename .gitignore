@@ -1,3 +1,5 @@
 .venv
 cryptography
 pdf_folder
+concurrency
+newest_hash
