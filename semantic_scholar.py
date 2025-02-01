@@ -1,5 +1,6 @@
 import requests
 from requests import get
+import time
 
 #Semantic Scholar 
 SS_BASE_URL = "https://api.semanticscholar.org/graph/v1/paper/search"
@@ -24,13 +25,12 @@ def find_most_relevant_paper(query):
         return {
             "title": top_paper.get("title", "Unknown"),
             "url": top_paper.get("url", ""),
+            "paper_id": top_paper.get("paperId", None),
             "year": top_paper.get("year", "N/A")
         }
     
     return None
 
-def find_influential_citations(url):
-    print("Search Most Influential Citations")
 
 def fetch_paper_details(paper_id, retries=5, delay=3):
     api_url = f"https://api.semanticscholar.org/v1/paper/{paper_id}"
@@ -56,18 +56,17 @@ def get_influential_papers(paper_id):
     details = fetch_paper_details(paper_id)
     if details is None:
         raise Exception("Not found")
-    influential_papers = []
-    for reference in details["references"]:
-        if reference["isInfluential"] == True:
-            influential_papers.append(reference)
-    return influential_papers
+    influential_titles = []
+    for reference in details.get("references", []):
+        if reference.get("isInfluential", False):
+            influential_titles.append(reference.get("title", "No title"))
+    return influential_titles
 
 
 topic = "Gaussian Splatting"
 most_relevant_paper = find_most_relevant_paper(topic)
 print(most_relevant_paper)
-
-# ?citedSort=is-influential
-
+influential_papers = get_influential_papers(most_relevant_paper["paper_id"])
+print(influential_papers)
 
 #https://www.semanticscholar.org/paper/3D-Gaussian-Splatting-for-Real-Time-Radiance-Field-Kerbl-Kopanas/2cc1d857e86d5152ba7fe6a8355c2a0150cc280a?citedSort=is-influential
