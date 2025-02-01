@@ -26,6 +26,48 @@ def execute_code(code):
 
 def display_code_ide(code):
     st.markdown("## Code Execution")
+
+    st.markdown("""
+        <style>
+            .stColumns {
+                display: flex;
+                align-items: stretch;  /* Makes columns the same height */
+            }
+            .code-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            .code-header h4 {
+                margin: 0;
+            }
+            .code-button {
+                background-color: #4CAF50;
+                color: white;
+                border: none;
+                padding: 5px 10px;
+                cursor: pointer;
+                border-radius: 5px;
+            }
+            /* Set st.code height equal to st.text_area */
+            .stCodeBlock {
+                height: 400px !important;
+                overflow-y: auto;
+            }
+            pre {
+                height: 100%;
+                overflow-y: auto;  /* Enable scrolling inside the code block */
+            }
+            /* Remove extra padding/margin above the text area */
+            textarea, .stTextArea label {
+                margin-top: 0px !important;
+                padding-top: 0px !important;
+            }
+            .stTextArea label {
+                display: none;  /* Completely hide any label above the text area */
+            }
+        </style>
+    """, unsafe_allow_html=True)
     
     # Ensure session state variable is initialized
     if "code_output" not in st.session_state:
@@ -36,15 +78,22 @@ def display_code_ide(code):
         col1, col2 = st.columns([1, 1])  # Adjust column width for better layout
         
         with col1:
-            st.markdown("#### Code:")
+            st.markdown("""
+                <div class="code-header">
+                    <h4>Code:</h4>
+                    <form action="" method="post">
+                        <button class="code-button" type="submit">Run Code</button>
+                    </form>
+                </div>
+            """, unsafe_allow_html=True)
+
             st.code(code, language="python", line_numbers=True)
-            if st.button("Run Code"):
-                st.session_state["code_output"] = execute_code(code)
         
         with col2:
             st.markdown("#### Output:")
-            st.text_area("", st.session_state["code_output"], height=400)
-
+            st.text_area("", st.session_state.get("code_output", ""), height=400, label_visibility="collapsed")
+    
+    return
 
 st.title("Knowledge Graph Viewer")
 code_snippet = fetch_code_snippet()
