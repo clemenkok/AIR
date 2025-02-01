@@ -55,7 +55,7 @@ def display_code_ide(code):
                 overflow-y: auto;
             }
             pre {
-                height: 100%;
+                height: 50vh !important;
                 overflow-y: auto;  /* Enable scrolling inside the code block */
             }
             /* Remove extra padding/margin above the text area */
