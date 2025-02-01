@@ -2,10 +2,12 @@ import requests
 from requests import get
 import time
 
+from datatypes import Node
+
 #Semantic Scholar 
 SS_BASE_URL = "https://api.semanticscholar.org/graph/v1/paper/search"
 
-def find_most_relevant_paper(query):
+def find_most_relevant_paper(query) -> Node:
     print("Search Semantic Scholar for the most relevant paper on a topic.")
     url = f"{SS_BASE_URL}"
     params = {
@@ -22,12 +24,11 @@ def find_most_relevant_paper(query):
     
     if "data" in data and len(data["data"]) > 0:
         top_paper = data["data"][0]
-        return {
-            "title": top_paper.get("title", "Unknown"),
-            "url": top_paper.get("url", ""),
-            "paper_id": top_paper.get("paperId", None),
-            "year": top_paper.get("year", "N/A")
-        }
+        return Node(
+            name = top_paper.get("title", "Unknown"),
+            url = top_paper.get("url", ""),
+            paper_id = top_paper.get("paperId", None)
+        )
     
     return None
 
@@ -52,7 +53,7 @@ def fetch_paper_details(paper_id, retries=5, delay=3):
     print("Max retries reached. Could not fetch paper details.")
     return None
 
-def get_influential_papers(paper_id):
+def get_influential_papers(paper_id) -> list[Node]:
     details = fetch_paper_details(paper_id)
     if details is None:
         raise Exception("Not found")
@@ -74,7 +75,7 @@ def get_influential_papers(paper_id):
 topic = "black holes"
 most_relevant_paper = find_most_relevant_paper(topic)
 print(most_relevant_paper)
-influential_papers = get_influential_papers(most_relevant_paper["paper_id"])
+influential_papers = get_influential_papers(most_relevant_paper.paper_id)
 print(influential_papers)
 
 #https://www.semanticscholar.org/paper/3D-Gaussian-Splatting-for-Real-Time-Radiance-Field-Kerbl-Kopanas/2cc1d857e86d5152ba7fe6a8355c2a0150cc280a?citedSort=is-influential
