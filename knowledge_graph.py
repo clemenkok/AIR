@@ -23,7 +23,6 @@ def find_most_relevant_paper(query, fields="title,url,year,citationCount"):
             "title": top_paper.get("title", "Unknown"),
             "url": top_paper.get("url", ""),
             "year": top_paper.get("year", "N/A"),
-            "citationCount": top_paper.get("citationCount", 0),
             "paperId": top_paper.get("paperId", None)
         }
     
