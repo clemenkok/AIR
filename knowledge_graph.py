@@ -40,17 +40,16 @@ def get_references(paper_id: str):
     
     return []
 
-def build_graph(knowledge_graph: dict, topic: str, depth: int = 1):
+def build_graph(knowledge_graph: dict, start_node: Node, depth: int = 3):
     if depth == 0:
         return
 
-    most_relevant_paper: Node = find_most_relevant_paper(topic)
-    if most_relevant_paper:
-        references: list[Node] = get_influential_papers(most_relevant_paper.paper_id)
+    if start_node:
+        references: list[Node] = get_influential_papers(start_node.paper_id)
 
         for ref in references:
-            knowledge_graph[most_relevant_paper].append(ref)
-            build_graph(knowledge_graph, ref.name, depth - 1)
+            knowledge_graph[start_node].append(ref)
+            build_graph(knowledge_graph, ref, depth - 1)
 
 def plot_citation_graph(citation_dict):
     """
@@ -91,45 +90,11 @@ def plot_citation_graph(citation_dict):
     # Show the plot
     plt.show()
 
-def prune_graph(graph, iterations):
-    for i in range(0, iterations):
-        degree_map = defaultdict(int)
-
-        for node in graph:
-            for endpoint in graph[node]:
-                print(endpoint)
-                degree_map[endpoint] += 1
-        leaves = [node for node in graph if degree_map[node] == 1]
-        for node in graph:
-            current_edges = graph[node]
-            graph[node] = [item for item in current_edges if item not in leaves]
-        for leaf in leaves:
-            del graph[leaf]
-    
-
 if __name__ == "__main__":
     knowledge_graph = defaultdict(list)
-    # knowledge_graph = {
-    #     Node("Gaussian Splatting for Real-Time Radiance Field Rendering"): [
-    #         Node("Neural Radiance Fields (NeRF)"), 
-    #         Node("Instant Neural Graphics Primitives"), 
-    #         Node("Volumetric Scene Representations")
-    #     ],
-    #     Node("Neural Radiance Fields (NeRF)"): [
-    #         Node("Volume Rendering Techniques"), 
-    #         Node("Photorealistic Scene Reconstruction")
-    #     ],
-    #     Node("Instant Neural Graphics Primitives"): [
-    #         Node("Efficient 3D Scene Representations")
-    #     ]
-    # }
 
     topic = "Gaussian Splatting"
     most_relevant_paper = find_most_relevant_paper(topic)
-    build_graph(knowledge_graph, topic)
-    # print(knowledge_graph)
+    build_graph(knowledge_graph, most_relevant_paper, depth=3)
+    print(f'{knowledge_graph=}')
     plot_citation_graph(knowledge_graph)
-
-    pruned_graph = knowledge_graph.copy()
-    prune_graph(pruned_graph, 1)
-    plot_citation_graph(pruned_graph)
