@@ -95,9 +95,31 @@ def display_code_ide(code):
         with col2:
             st.markdown("#### Output:")
             st.text_area("", st.session_state.get("code_output", ""), height=400, label_visibility="collapsed")
-    
+
     return
+
+def display_images():
+    # List of image filenames
+    image_urls = [
+        "lossfunction.png",
+        "lossfunction.png",
+        "lossfunction.png",
+        "lossfunction.png",
+        "lossfunction.png"
+    ]
+
+    st.markdown("## Images:")
+    num_images = len(image_urls)
+    num_columns_per_row = 3
+
+    for i in range(0, num_images, num_columns_per_row):
+        cols = st.columns(num_columns_per_row)
+        for j in range(num_columns_per_row):
+            if i + j < num_images:
+                with cols[j]:
+                    st.image(image_urls[i + j], width=400)
 
 st.title("Knowledge Graph Viewer")
 code_snippet = fetch_code_snippet()
 display_code_ide(code_snippet)
+display_images()
