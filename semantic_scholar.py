@@ -61,7 +61,7 @@ def get_influential_papers(paper_id) -> list[Node]:
     influential_papers = []
     
     # Take the first 5 references (if available)
-    for reference in details.get("references", [])[:5]:
+    for reference in details.get("references", [])[:2]:
         influential_papers.append(
             Node(
                 name = reference.get("title", "Unknown"),

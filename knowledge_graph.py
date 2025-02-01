@@ -79,7 +79,7 @@ def plot_citation_graph(citation_dict):
     nx.draw_networkx_edges(G, pos, arrowstyle='->', arrowsize=20, edge_color='gray', width=1.5)
     
     # Add labels with smaller font size for clarity
-    nx.draw_networkx_labels(G, pos, font_size=10, font_color='black', font_weight='bold')
+    nx.draw_networkx_labels(G, pos, font_size=5, font_color='black', font_weight='bold')
     
     # Remove axis
     plt.axis('off')
