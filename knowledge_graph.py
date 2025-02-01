@@ -79,15 +79,15 @@ def plot_citation_graph_streamlit(citation_dict):
 
 
 # # Streamlit UI
-# st.title("Knowledge Graph")
+st.title("Knowledge Graph")
 
-# knowledge_graph = defaultdict(list)
-# topic = st.text_input("Enter a research topic:", "Gaussian Splatting")
+knowledge_graph = defaultdict(list)
+topic = st.text_input("Enter a research topic:", "Gaussian Splatting")
 
-# if st.button("Generate Graph"):
-#     most_relevant_paper = find_most_relevant_paper(topic)
-#     print(most_relevant_paper.name)
-#     build_graph(knowledge_graph, most_relevant_paper, depth=3)
-#     print(json.dumps(knowledge_graph))
-#     st.write("Knowledge Graph Built:", knowledge_graph)
-#     plot_citation_graph_streamlit(knowledge_graph)
+if st.button("Generate Graph"):
+    most_relevant_paper = find_most_relevant_paper(topic)
+    print(most_relevant_paper.name)
+    build_graph(knowledge_graph, most_relevant_paper, depth=3)
+    print(json.dumps(knowledge_graph))
+    st.write("Knowledge Graph Built:", knowledge_graph)
+    plot_citation_graph_streamlit(knowledge_graph)
