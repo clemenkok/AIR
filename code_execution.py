@@ -2,7 +2,7 @@ import streamlit as st
 import sys
 import io
 
-# set width of page to be full 
+# set width of page to be full
 st.set_page_config(layout="wide")
 
 def fetch_code_snippet():
@@ -88,7 +88,10 @@ def display_code_ide(code):
             """, unsafe_allow_html=True)
 
             st.code(code, language="python", line_numbers=True)
-        
+
+            # if st.button("Run Code"):
+            #     print("runcode pressed")
+            #     st.session_state["code_output"] = execute_code(code)
         with col2:
             st.markdown("#### Output:")
             st.text_area("", st.session_state.get("code_output", ""), height=400, label_visibility="collapsed")
