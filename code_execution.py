@@ -2,7 +2,7 @@ import streamlit as st
 import sys
 import io
 
-# set width of page to be full
+# set width of page to be full 
 st.set_page_config(layout="wide")
 
 def fetch_code_snippet():
@@ -41,13 +41,25 @@ def display_code_ide(code):
             .code-header h4 {
                 margin: 0;
             }
-            .code-button {
+            .stButton {
+                display: flex;
+                justify-content: center;
+            }
+            .stButton > button {
                 background-color: #4CAF50;
                 color: white;
                 border: none;
                 padding: 5px 10px;
                 cursor: pointer;
                 border-radius: 5px;
+                font-size: 14px;
+            }
+            .stButton > button:hover {
+                background-color: #45a049;
+            }
+            .button-container {
+                display: flex;
+                justify-content: flex-end;  /* Right-aligns the button */
             }
             /* Set st.code height equal to st.text_area */
             .stCodeBlock {
@@ -81,17 +93,14 @@ def display_code_ide(code):
             st.markdown("""
                 <div class="code-header">
                     <h4>Code:</h4>
-                    <form action="" method="post">
-                        <button class="code-button" type="submit">Run Code</button>
-                    </form>
                 </div>
             """, unsafe_allow_html=True)
 
             st.code(code, language="python", line_numbers=True)
-
-            # if st.button("Run Code"):
-            #     print("runcode pressed")
-            #     st.session_state["code_output"] = execute_code(code)
+            if st.button("Run Code"):
+                # Replace this with your actual function to execute code
+                st.session_state["code_output"] = execute_code(code)
+        
         with col2:
             st.markdown("#### Output:")
             st.text_area("", st.session_state.get("code_output", ""), height=400, label_visibility="collapsed")
