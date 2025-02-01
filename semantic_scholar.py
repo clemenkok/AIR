@@ -33,7 +33,7 @@ def find_most_relevant_paper(query):
 
 
 def fetch_paper_details(paper_id, retries=5, delay=3):
-    api_url = f"https://api.semanticscholar.org/v1/paper/{paper_id}"
+    api_url = f"https://api.semanticscholar.org/v1/paper/{paper_id}/?citedSort=is-influential"
     
     for attempt in range(retries):
         response = requests.get(api_url)
@@ -56,19 +56,22 @@ def get_influential_papers(paper_id):
     details = fetch_paper_details(paper_id)
     if details is None:
         raise Exception("Not found")
+    
     influential_papers = []
-    for reference in details.get("references", []):
-        if reference.get("isInfluential", False):
-            influential_papers.append({
-                "title": reference.get("title", "Unknown"),
-                "url": reference.get("url", ""),
-                "paper_id": reference.get("paperId", None),
-                "year": reference.get("year", "N/A")
-            })
+    
+    # Take the first 5 references (if available)
+    for reference in details.get("references", [])[:5]:
+        influential_papers.append({
+            "title": reference.get("title", "Unknown"),
+            "url": reference.get("url", ""),
+            "paper_id": reference.get("paperId", None),
+            "year": reference.get("year", "N/A")
+        })
+    
     return influential_papers
 
 
-topic = "Gaussian Splatting"
+topic = "black holes"
 most_relevant_paper = find_most_relevant_paper(topic)
 print(most_relevant_paper)
 influential_papers = get_influential_papers(most_relevant_paper["paper_id"])
