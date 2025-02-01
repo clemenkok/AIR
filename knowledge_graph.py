@@ -113,8 +113,23 @@ def plot_citation_graph(citation_dict):
     # Show the plot
     plt.show()
 
+def prune_graph(graph, iterations):
+    
+    for i in range(0, iterations):
+        degree_map = {node : 0 for node in graph}
+        for node in graph:
+            for endpoint in graph[node]:
+                degree_map[endpoint] += 1
+        leaves = [node for node in graph if degree_map[node] == 1]
+        for node in graph:
+            current_edges = graph[node]
+            graph[node] = [item for item in current_edges if item not in leaves]
+        for leaf in leaves:
+            del graph[leaf]
+    
+
 if __name__ == "__main__":
-    knowledge_graph = knowledge_graph = {
+    knowledge_graph = {
         "Gaussian Splatting for Real-Time Radiance Field Rendering": [
             "Neural Radiance Fields (NeRF)", 
             "Instant Neural Graphics Primitives", 
