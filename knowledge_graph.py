@@ -62,25 +62,6 @@ def get_references(paper_id: str):
     
     return []
 
-# Example usage
-topic = "Gaussian Splatting"
-most_relevant_paper = find_most_relevant_paper(topic)
-
-knowledge_graph = knowledge_graph = {
-    "Gaussian Splatting for Real-Time Radiance Field Rendering": [
-        "Neural Radiance Fields (NeRF)", 
-        "Instant Neural Graphics Primitives", 
-        "Volumetric Scene Representations"
-    ],
-    "Neural Radiance Fields (NeRF)": [
-        "Volume Rendering Techniques", 
-        "Photorealistic Scene Reconstruction"
-    ],
-    "Instant Neural Graphics Primitives": [
-        "Efficient 3D Scene Representations"
-    ]
-}
-
 def build_graph(knowledge_graph: dict, topic: str, depth: int = 1):
     if depth == 0:
         return
@@ -132,7 +113,24 @@ def plot_citation_graph(citation_dict):
     # Show the plot
     plt.show()
 
+if __name__ == "__main__":
+    knowledge_graph = knowledge_graph = {
+        "Gaussian Splatting for Real-Time Radiance Field Rendering": [
+            "Neural Radiance Fields (NeRF)", 
+            "Instant Neural Graphics Primitives", 
+            "Volumetric Scene Representations"
+        ],
+        "Neural Radiance Fields (NeRF)": [
+            "Volume Rendering Techniques", 
+            "Photorealistic Scene Reconstruction"
+        ],
+        "Instant Neural Graphics Primitives": [
+            "Efficient 3D Scene Representations"
+        ]
+    }
 
-# build_graph(knowledge_graph, topic)
-# print(knowledge_graph)
-plot_citation_graph(knowledge_graph)
+    topic = "Gaussian Splatting"
+    most_relevant_paper = find_most_relevant_paper(topic)
+    build_graph(knowledge_graph, topic)
+    print(knowledge_graph)
+    plot_citation_graph(knowledge_graph)
