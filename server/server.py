@@ -1,3 +1,5 @@
+import base64
+import mimetypes
 import anthropic 
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
@@ -100,4 +102,59 @@ async def generate_code(req: CodeRequest):
         media_type="text/event-stream"
     )
 
+class SummaryRequest(BaseModel):
+    plan: str
+    code: str
+    image_path: list[str] = []
+    output: str
 
+def encode_image_to_base64(image_path):
+    """Converts an image to Base64 with its media type."""
+    with open(image_path, "rb") as img_file:
+        encoded_data = base64.b64encode(img_file.read()).decode("utf-8")
+    media_type, _ = mimetypes.guess_type(image_path)
+    return encoded_data, media_type or "image/png"
+
+def generate_summary_with_claude(plan, code, output, image_paths):
+    """Generates a summary using Claude with text and image inputs."""
+
+    messages_content = []
+    prompt = f"""
+        Based on the provided information and images, generate a comprehensive summary of the experiment.
+        
+        Here is the experiment plan:
+        {plan}
+        
+        Code snippet:
+        {code}
+        
+        Output:
+        {output}
+    """
+
+    # Attach images to the message
+    for image_path in image_paths:
+        image_data, media_type = encode_image_to_base64(image_path)
+        messages_content.append(
+            {"type": "image", "source": {"type": "base64", "media_type": media_type, "data": image_data}}
+        )
+
+    messages_content.append({"type": "text", "text": prompt})
+
+    # Send request to Claude
+    message = client.messages.create(
+        model="claude-3-5-sonnet-20241022",
+        max_tokens=4000,
+        temperature=0.7,
+        messages=[{"role": "user", "content": messages_content}]
+    )
+
+    return message.content
+
+@app.post("/generate_summary")
+async def generate_summary(req: SummaryRequest):
+
+    return StreamingResponse(
+        generate_summary_with_claude(req.plan, req.code, req.output, req.image_path),
+        media_type="text/event-stream"
+    )
