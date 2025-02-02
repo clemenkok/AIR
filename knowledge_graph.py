@@ -57,8 +57,7 @@ def plot_citation_graph_streamlit(citation_dict, node_metadata):
     Displays a citation graph using PyVis inside Streamlit with
     author name and year on hover.
     """
-    print("Plotting
-         graph")
+    print("Plotting graph")
     G = nx.DiGraph()
 
     # Add edges to the NetworkX graph
@@ -101,7 +100,6 @@ def plot_citation_graph_streamlit(citation_dict, node_metadata):
         }
     """)
 
-    # Add nodes with hover info
     for node in G.nodes:
         meta = node_metadata.get(node, {})
         title_text = meta.get("title", node)
@@ -115,6 +113,19 @@ def plot_citation_graph_streamlit(citation_dict, node_metadata):
         # Full details on hover
         hover_text = f"{title_text}\nAuthor: {author}\nYear: {year}\nAbstract:{abstract}\n"
         net.add_node(node, label=label, title=hover_text)
+
+    # Add edges
+    for edge in G.edges:
+        net.add_edge(edge[0], edge[1])
+
+    # Generate the interactive graph HTML
+    html_path = "citation_graph.html"
+    net.write_html(html_path)
+
+    # Render the graph in Streamlit
+    with open(html_path, "r", encoding="utf-8") as f:
+        html_content = f.read()
+    st.components.v1.html(html_content, height=600)
 
     # Add edges
     for edge in G.edges:
@@ -151,7 +162,7 @@ if st.button("Generate Graph"):
 
     # Plot the graph with PyVis
     plot_citation_graph_streamlit(knowledge_graph, node_metadata)
-
+    
 # # # Streamlit UI
 # st.title("Knowledge Graph")
 
