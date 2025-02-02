@@ -33,7 +33,6 @@ def gen_summary():
     print(data)
 
     st.write("#### Insights")
-    st.write("Generating summary...")
 
     try:
         response = requests.post(URL, json=data)

@@ -39,12 +39,17 @@ def experiment_outline_frontend():
     # Initially render the content with the current streamed text
     dynamic_container.markdown(st.session_state.streamed_text, unsafe_allow_html=True)
 
+    if st.session_state.streamed_text == "":
+        stream_claude_section("Experiment Outline", dynamic_container)
+
     # Button for Regenerating the outline
     _, regen_btn, _, cont_btn, _ = st.columns([5, 4, 1, 4, 5])
 
     with regen_btn:
         if st.button("Regenerate"):
+            st.session_state.streamed_text = ""
             stream_claude_section("Regenerate", dynamic_container)
+            
 
     with cont_btn:
         if st.button("Continue"):
