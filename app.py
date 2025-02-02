@@ -2,28 +2,18 @@ import streamlit as st
 
 st.set_page_config(layout="wide")
 
-import json
-from collections import defaultdict
-from knowledge_graph import find_most_relevant_paper, build_graph, plot_citation_graph_streamlit
-from code_execution import fetch_code_snippet, display_code_ide, display_images
+from knowledge_graph import knowledge_graph_frontend
+from experiment_outline import experiment_outline_frontend
+from code_execution import code_execution_frontend
 
-st.title("Knowledge Graph Viewer")
+if __name__ == "__main__":
+    st.session_state.knowledge_graph_complete = False
+    st.session_state.experiment_outline_complete = False
+    st.session_state.code_execution_complete = False
 
-knowledge_graph = defaultdict(list)
-topic = st.text_input("Enter a research topic:", "Gaussian Splatting")
+    knowledge_graph_frontend()
 
-graph_generated = False
-
-if st.button("Generate Graph"):
-#     most_relevant_paper = find_most_relevant_paper(topic)
-#     print(most_relevant_paper.name)
-#     build_graph(knowledge_graph, most_relevant_paper, depth=3)
-#     print(json.dumps(knowledge_graph))
-#     st.write("Knowledge Graph Built:", knowledge_graph)
-#     plot_citation_graph_streamlit(knowledge_graph)
-    graph_generated = True
-
-if graph_generated:
-    code_snippet = fetch_code_snippet()
-    display_code_ide(code_snippet)
-    display_images()
+    if st.session_state.knowledge_graph_complete:
+        experiment_outline_frontend()
+        if st.session_state.experiment_outline_complete:
+            code_execution_frontend()

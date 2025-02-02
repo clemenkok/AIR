@@ -6,7 +6,7 @@ import os
 # import numpy as np
 
 # Set page layout to wide
-st.set_page_config(layout="wide")
+# st.set_page_config(layout="wide")
 
 # Define the images folder path
 IMAGES_FOLDER = "generated_images"
@@ -104,26 +104,26 @@ def display_code_ide(code):
             .code-header h4 {
                 margin: 0;
             }
-            .stButton {
-                display: flex;
-                justify-content: center;
-            }
-            .stButton > button {
-                background-color: #4CAF50;
-                color: white;
-                border: none;
-                padding: 5px 10px;
-                cursor: pointer;
-                border-radius: 5px;
-                font-size: 14px;
-            }
-            .stButton > button:hover {
-                background-color: #45a049;
-            }
-            .button-container {
-                display: flex;
-                justify-content: flex-end;  /* Right-aligns the button */
-            }
+            # .stButton {
+            #     display: flex;
+            #     justify-content: center;
+            # }
+            # .stButton > button {
+            #     background-color: #4CAF50;
+            #     color: white;
+            #     border: none;
+            #     padding: 5px 10px;
+            #     cursor: pointer;
+            #     border-radius: 5px;
+            #     font-size: 14px;
+            # }
+            # .stButton > button:hover {
+            #     background-color: #45a049;
+            # }
+            # .button-container {
+            #     display: flex;
+            #     justify-content: flex-end;  /* Right-aligns the button */
+            # }
             /* Set st.code height equal to st.text_area */
             .stCodeBlock {
                 height: 400px !important;
@@ -186,11 +186,11 @@ def display_images():
                 with cols[j]:
                     st.image(image_urls[i + j], width=400)
 
-st.title("Knowledge Graph Viewer")
-
-# Fetch Python code and display the IDE
-code_snippet = fetch_code_snippet()
-display_code_ide(code_snippet)
-images_generated = check_images_generated()
-if images_generated:
-    display_images()
+# st.title("Knowledge Graph Viewer")
+def code_execution_frontend():
+# # Fetch Python code and display the IDE
+    code_snippet = fetch_code_snippet()
+    display_code_ide(code_snippet)
+    images_generated = check_images_generated()
+    if images_generated:
+        display_images()

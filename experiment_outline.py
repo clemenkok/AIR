@@ -3,10 +3,10 @@ import streamlit as st
 
 from constants import BACKEND_URL
 
-st.set_page_config(layout="wide")
+# st.set_page_config(layout="wide")
 st.session_state.streamed_text = ""
 
-def outline():
+def experiment_outline_frontend():
     st.session_state.setdefault('streamed_text', "")
 
     # Custom CSS for height and button positioning
@@ -15,10 +15,10 @@ def outline():
             .text-area {
                 height: 70vh !important;
             }
-            .stButton {
-                display: flex;
-                justify-content: center;
-            }
+            # .stButton {
+            #     display: flex;
+            #     justify-content: center;
+            # }
             .stButton > button {
                 padding: 0.5em 2em;
                 font-size: 1.2rem;
@@ -42,14 +42,17 @@ def outline():
         height=500  # Base height to ensure the text_area expands
     )
 
-    _, regen_btn, _, cont_btn, _ = st.columns([5, 4, 1, 4, 5])
+    # _, regen_btn, _, cont_btn, _ = st.columns([5, 4, 1, 4, 5])
 
-    with regen_btn:
-        st.button("Regenerate", on_click=stream_claude_section("Regenerate"))
+    # with regen_btn:
+    if st.button("Regenerate"):
+        stream_claude_section("Regenerate")
 
-    with cont_btn:
-        st.button("Continue", on_click=lambda: print('Continue'))
-
+    # with cont_btn:
+    if st.button("Continue"):
+        st.session_state.experiment_outline_complete = True
+        # print(st.session_state.experiment_outline_complete)
+        
 def stream_claude_section(section_text):
     # Populate the arg
     return
@@ -70,4 +73,4 @@ def stream_claude_section(section_text):
     else:
         st.error("Error: Unable to stream from Claude API.")
 
-outline()
+# outline()
