@@ -9,6 +9,8 @@ import matplotlib.pyplot as plt
 from datatypes import Node
 from semantic_scholar import find_most_relevant_paper, get_influential_papers
 
+st.set_page_config(layout="wide")
+
 # Semantic Scholar API endpoint
 BASE_URL = "https://api.semanticscholar.org/graph/v1/paper/search"
 
@@ -57,8 +59,7 @@ def plot_citation_graph_streamlit(citation_dict, node_metadata):
     Displays a citation graph using PyVis inside Streamlit with
     author name and year on hover.
     """
-    print("Plotting
-         graph")
+    print("Plotting graph")
     G = nx.DiGraph()
 
     # Add edges to the NetworkX graph
@@ -109,11 +110,15 @@ def plot_citation_graph_streamlit(citation_dict, node_metadata):
         abstract = meta.get("abstract", "Unknown")
         year = meta.get("year", "Unknown")
 
+        # Break abstract into chunks of 100 characters
+        abstract_chunks = [abstract[i:i+100] for i in range(0, len(abstract), 100)]
+        formatted_abstract = '\n'.join(abstract_chunks)
+
         # We'll display a shorter label so it doesn't crowd the graph
         label = f"{title_text[:30]}..." if len(title_text) > 30 else title_text
 
         # Full details on hover
-        hover_text = f"{title_text}\nAuthor: {author}\nYear: {year}\nAbstract:{abstract}\n"
+        hover_text = f"{title_text}\nAuthor: {author}\nYear: {year}\nAbstract: {formatted_abstract}\n"
         net.add_node(node, label=label, title=hover_text)
 
     # Add edges
