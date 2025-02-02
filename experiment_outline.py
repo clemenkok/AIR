@@ -1,85 +1,45 @@
-import requests
 import streamlit as st
-
 from constants import BACKEND_URL
-
-# st.set_page_config(layout="wide")
-st.session_state.streamed_text = ""
+from claude2 import generate_outline
 
 def experiment_outline_frontend():
-    st.session_state.setdefault('streamed_text', "")
-
-    # Custom CSS for height and button positioning
-    st.markdown("""
-        <style>
-            .text-area {
-                height: 70vh !important;
-            }
-            # .stButton {
-            #     display: flex;
-            #     justify-content: center;
-            # }
-            .stButton > button {
-                padding: 0.5em 2em;
-                font-size: 1.2rem;
-                min-width: 150px;
-                transition: all 0.2s ease;
-            }
-            .stButton > button:hover {
-                transform: scale(1.05);
-            }
-        </style>
-    """, unsafe_allow_html=True)
-
     st.markdown("#### Experiment Outline")
+    
+    # Create a container for our streaming output
+    output_container = st.empty()
+    
+    # Initialize session state if needed
+    if 'streamed_outline' not in st.session_state:
+        st.session_state.streamed_outline = ""
 
-    # Text Area with streamed content
-    # st.text_area(
-    #     label="Outline",
-    #     value=st.session_state.streamed_text,
-    #     placeholder="Thinking of ideas...",
-    #     key="outline_text",
-    #     height=500  # Base height to ensure the text_area expands
-    # )
+    # Init the streamed content
+    stream_content(output_container)
 
-    st.markdown("""
-        <textarea id="dynamic-textarea" style="width: 100%; height: 500px;">
-        </textarea>
-    """, unsafe_allow_html=True)
-
-    _, regen_btn, _, cont_btn, _ = st.columns([5, 4, 1, 4, 5])
-
-    with regen_btn:
-        if st.button("Regenerate"):
-            stream_claude_section("Regenerate")
-
-    with cont_btn:
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("Regenerate", type="primary"):
+            # Reset content
+            st.session_state.streamed_outline = ""
+            stream_content(output_container)
+            
+    with col2:
         if st.button("Continue"):
             st.session_state.experiment_outline_complete = True
-        
-def stream_claude_section(section_text):
-    # Reset the streamed text
-    st.session_state.streamed_text = ""
 
-    # Replace this with your actual Claude streaming API endpoint
-    url = f"{BACKEND_URL}/generate_outline"  # Example endpoint
-    
+def stream_content(container):
+    """Handle the streaming with proper session state management"""
     payload = st.session_state.selected_paper_data
-    response = requests.post(url, json=payload, stream=True)
     
-    if response.status_code == 200:
-        for line in response.iter_lines():
-            if line:
-                decoded_line = line.decode('utf-8')
-                # st.session_state.streamed_text += decoded_line
+    def content_generator():
+        try:
+            for outline_content in generate_outline(payload):
+                st.session_state.streamed_outline += outline_content
 
-                st.markdown(f"""
-                    <script>
-                        const textArea = document.getElementById('dynamic-textarea');
-                        textArea.innerHTML += `{decoded_line}`;
-                    </script>
-                """, unsafe_allow_html=True)
-    else:
-        st.error("Error: Unable to stream from Claude API.")
-
-# outline()
+                yield outline_content
+        except Exception as e:
+            yield f"🚨 Connection error: {str(e)}"
+    
+    # Clear previous content and stream new response
+    with container:
+        st.session_state.streamed_outline = ""  # Clear previous content
+        st.write(content_generator())
