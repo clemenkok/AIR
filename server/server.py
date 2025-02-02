@@ -61,8 +61,9 @@ async def generate_outline(outline: Outlines):
         """
 
     prompt = f"""
-        Generate an experimental outline for the following research paper.
-        
+        Generate an experimental outline for the following research paper. Return a markdown styled answer/outline.
+        Don't make the title too large, make it the same size as the headings.
+
         Involve the following ideas, including their titles and abstracts to form a basis:
         {formatted_data}
     """
