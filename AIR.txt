@@ -1,51 +1,60 @@
-Here are 5 novel cryptographic hash function concepts, inspired by the reviewed papers:
+Here are 5 original research ideas inspired by the papers:
 
-1. Spectral Permutation Hash (SPH)
-Methodology: Combines ideas from Spectral Hashing (Weiss et al.) with permutation-based approaches like BLAKE3. The input would first undergo spectral decomposition using eigenvector analysis, similar to how Spectral Hashing processes data. These spectral components would then be fed into a permutation-based compression function that operates on fixed-width blocks.
+1. Adaptive Hybrid Concurrency Control with Dynamic Protocol Switching
+Rationale: Inspired by Shirakami's hybrid approach combining different protocols for short and long transactions. Could automatically switch between protocols based on workload characteristics.
 
-Viability: Potentially viable for specialized applications where data has natural spectral properties. The main challenge would be ensuring collision resistance across all input types. The spectral preprocessing could provide interesting diffusion properties.
+Methodology:
+- Develop metrics to classify transaction types in real-time
+- Create switching mechanism between 2PL, MVCC, and optimistic protocols
+- Implement machine learning model to predict optimal protocol based on workload patterns
+- Evaluate performance impact of switching overhead vs benefits
 
-Inspiration: Spectral Hashing paper's eigenfunction approach combined with BLAKE3's permutation design.
+References: Kambayashi et al. (2023) Shirakami hybrid protocol approach
 
-2. Tree-Based Adaptive Hash (TAH) 
-Methodology: Creates a dynamic tree structure where the branching factor adapts based on input characteristics, unlike BLAKE3's fixed binary tree. The adaptation would follow rules based on input entropy measurements. High-entropy regions get more branches for better parallelization, while low-entropy regions use fewer branches to optimize processing.
+2. Distributed Fair Thread ID Assignment for Decentralized Systems
+Rationale: Extends the FairTID concept from T. Nguyen's paper to fully distributed systems without central coordination.
 
-Viability: Promising for handling diverse input types efficiently, but would need careful design to maintain consistent security properties across different tree configurations. Implementation complexity is a concern.
+Methodology:
+- Design distributed algorithm for thread ID assignment across nodes
+- Implement vector clock synchronization between nodes
+- Evaluate fairness and throughput compared to centralized approach
+- Measure impact on network traffic and latency
 
-Inspiration: BLAKE3's tree hashing combined with Streebog's structural elements.
+References: T. Nguyen and H. Kawashima (2023) FairTID method
 
-3. Hybrid Sponge-Spectral Hash (HSSH)
-Methodology: Uses a hybrid construction combining the sponge function approach from SHA-3/KECCAK with spectral transformation stages. The absorption phase would include spectral decomposition steps between permutation rounds, potentially providing stronger mixing properties.
+3. Node-Level Concurrency Control with Hardware Transactional Memory
+Rationale: Combine node-locking protocol with hardware transactional memory support for improved performance.
 
-Viability: Theoretically interesting but may be computationally expensive. Would need extensive security analysis to verify the interaction between sponge and spectral components.
+Methodology:
+- Modify node-locking protocol to utilize HTM where available
+- Implement fallback path for transaction aborts
+- Compare performance with software-only approaches
+- Analyze abort rates and causes
 
-Inspiration: SHA-3's sponge construction combined with spectral analysis concepts.
+References: K. Doki et al. (2023) Node locking approach
 
-4. Multi-Domain Parallel Hash (MDPH)
-Methodology: Processes input in parallel across multiple independent "domains" with different parameters (similar to SHA-3's domain separation but concurrent). Final output combines results using a novel domain mixing function. Each domain could use different internal constants and round functions.
+4. Starvation-Free Protocol for Mixed OLTP/OLAP Workloads
+Rationale: Extend 2PLSF approach to handle both transactional and analytical queries efficiently.
 
-Viability: Good potential for high-performance applications. Main challenge would be proving independence between domains and ensuring the mixing function preserves security properties.
+Methodology:
+- Design separate handling for short OLTP and long-running OLAP transactions
+- Implement priority inheritance to prevent starvation
+- Evaluate impact on both OLTP latency and OLAP throughput
+- Compare with specialized HTAP systems
 
-Inspiration: BLAKE3's parallelization approach and SHA-3's domain separation concept.
+References: Ramalho et al. (2023) 2PLSF protocol
 
-5. Recursive Spectral Compression Hash (RSCH)
-Methodology: Applies spectral compression recursively at multiple scales, creating a hierarchical hash structure. Each level would compress data using spectral properties before feeding into the next level. Final output combines information from all levels.
+5. Phantom Prevention with Minimal Index Locking
+Rationale: Improve scan performance while maintaining consistency by reducing index lock overhead.
 
-Viability: Interesting theoretical properties but likely too computationally intensive for general use. Could find applications in specialized domains where hierarchical structure matches the data.
+Methodology:
+- Develop new index structure supporting lightweight range locks
+- Implement incremental validation for range scans
+- Compare with traditional next-key locking approaches
+- Measure impact on concurrent updates and phantom prevention
 
-Inspiration: Spectral Hashing's dimensionality reduction combined with BLAKE3's hierarchical approach.
+References: K. Doki et al. (2023) Scan transaction acceleration
 
-Key Considerations for All Proposals:
-- Security analysis would need to verify collision resistance, preimage resistance, and second preimage resistance
-- Performance characteristics would need careful benchmarking
-- Implementation complexity vs. security benefits would need evaluation
-- Formal security proofs would be required
-- Side-channel attack resistance would need verification
+Each idea builds upon concepts from the papers while exploring new directions. The methodologies focus on practical implementation and empirical evaluation to demonstrate improvements over existing approaches.
 
-References:
-1. BLAKE3 paper (O'Connor et al.)
-2. "Spectral Hashing" (Weiss et al.)
-3. "SHA-3 Standard: Permutation-Based Hash and Extendable-Output Functions" (FIPS 202)
-4. "Streebog as a Random Oracle" (Akhmetzyanova et al.)
-
-These proposals represent novel combinations of existing concepts while introducing new elements. Each would require extensive cryptanalysis and security proofs before practical implementation could be considered.
+These ideas address important challenges in concurrent database systems while maintaining the balance between consistency and performance that was emphasized in the source papers.
