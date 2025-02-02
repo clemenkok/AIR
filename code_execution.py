@@ -208,7 +208,11 @@ def display_images():
 def code_execution_frontend():
 # # Fetch Python code and display the IDE
     code_snippet = fetch_code_snippet()
+
+    st.session_state.code_snippet = code_snippet
     display_code_ide(code_snippet)
     images_generated = check_images_generated()
     if images_generated:
         display_images()
+
+    st.session_state.code_execution_complete = True

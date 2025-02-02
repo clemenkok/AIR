@@ -2,7 +2,7 @@ import base64
 import mimetypes
 import anthropic 
 from fastapi import FastAPI
-from fastapi.responses import StreamingResponse
+from fastapi.responses import Response, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from pydantic import BaseModel
@@ -138,6 +138,7 @@ def generate_summary_with_claude(plan, code, output, image_paths):
         messages_content.append(
             {"type": "image", "source": {"type": "base64", "media_type": media_type, "data": image_data}}
         )
+        messages_content.append({"type": "text", "text": "Analyse the image carefully."})
 
     messages_content.append({"type": "text", "text": prompt})
 
@@ -149,12 +150,12 @@ def generate_summary_with_claude(plan, code, output, image_paths):
         messages=[{"role": "user", "content": messages_content}]
     )
 
-    return message.content
+    return message.content[0].text
 
 @app.post("/generate_summary")
 async def generate_summary(req: SummaryRequest):
 
-    return StreamingResponse(
+    return Response(
         generate_summary_with_claude(req.plan, req.code, req.output, req.image_path),
         media_type="text/event-stream"
     )
