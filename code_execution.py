@@ -2,6 +2,8 @@ import streamlit as st
 import sys
 import io
 import os
+import requests
+from constants import BACKEND_URL
 # import matplotlib.pyplot as plt
 # import numpy as np
 
@@ -15,59 +17,75 @@ IMAGES_FOLDER = "generated_images"
 if not os.path.exists(IMAGES_FOLDER):
     os.makedirs(IMAGES_FOLDER)
 
+# def fetch_code_snippet():
+#     return """import numpy as np
+# import matplotlib.pyplot as plt
+# import os
+
+# # Define the images folder path
+# IMAGES_FOLDER = "generated_images"
+
+# # Create data for 4 different graphs
+# x = np.linspace(0, 10, 100)
+
+# # First graph: Sine wave
+# y1 = np.sin(x)
+# plt.plot(x, y1)
+# plt.title('Sine Wave')
+# plt.xlabel('X-axis')
+# plt.ylabel('Y-axis')
+# plt.savefig(os.path.join(IMAGES_FOLDER, 'graph1.png'))
+# plt.close()  # Close the plot to free memory
+# print("Graph 1 (Sine Wave) saved.")
+
+# # Second graph: Cosine wave
+# y2 = np.cos(x)
+# plt.plot(x, y2)
+# plt.title('Cosine Wave')
+# plt.xlabel('X-axis')
+# plt.ylabel('Y-axis')
+# plt.savefig(os.path.join(IMAGES_FOLDER, 'graph2.png'))
+# plt.close()
+# print("Graph 2 (Cosine Wave) saved.")
+
+# # Third graph: Tangent wave
+# y3 = np.tan(x)
+# plt.plot(x, y3)
+# plt.title('Tangent Wave')
+# plt.xlabel('X-axis')
+# plt.ylabel('Y-axis')
+# plt.ylim(-10, 10)  # Limit y-axis for better visualization
+# plt.savefig(os.path.join(IMAGES_FOLDER, 'graph3.png'))
+# plt.close()
+# print("Graph 3 (Tangent Wave) saved.")
+
+# # Fourth graph: Exponential growth
+# y4 = np.exp(x)
+# plt.plot(x, y4)
+# plt.title('Exponential Growth')
+# plt.xlabel('X-axis')
+# plt.ylabel('Y-axis')
+# plt.savefig(os.path.join(IMAGES_FOLDER, 'graph4.png'))
+# plt.close()
+# print("Graph 4 (Exponential Growth) saved.")
+
+# print("Matplotlib is DONE!")"""
+
 def fetch_code_snippet():
-    return """import numpy as np
-import matplotlib.pyplot as plt
-import os
-
-# Define the images folder path
-IMAGES_FOLDER = "generated_images"
-
-# Create data for 4 different graphs
-x = np.linspace(0, 10, 100)
-
-# First graph: Sine wave
-y1 = np.sin(x)
-plt.plot(x, y1)
-plt.title('Sine Wave')
-plt.xlabel('X-axis')
-plt.ylabel('Y-axis')
-plt.savefig(os.path.join(IMAGES_FOLDER, 'graph1.png'))
-plt.close()  # Close the plot to free memory
-print("Graph 1 (Sine Wave) saved.")
-
-# Second graph: Cosine wave
-y2 = np.cos(x)
-plt.plot(x, y2)
-plt.title('Cosine Wave')
-plt.xlabel('X-axis')
-plt.ylabel('Y-axis')
-plt.savefig(os.path.join(IMAGES_FOLDER, 'graph2.png'))
-plt.close()
-print("Graph 2 (Cosine Wave) saved.")
-
-# Third graph: Tangent wave
-y3 = np.tan(x)
-plt.plot(x, y3)
-plt.title('Tangent Wave')
-plt.xlabel('X-axis')
-plt.ylabel('Y-axis')
-plt.ylim(-10, 10)  # Limit y-axis for better visualization
-plt.savefig(os.path.join(IMAGES_FOLDER, 'graph3.png'))
-plt.close()
-print("Graph 3 (Tangent Wave) saved.")
-
-# Fourth graph: Exponential growth
-y4 = np.exp(x)
-plt.plot(x, y4)
-plt.title('Exponential Growth')
-plt.xlabel('X-axis')
-plt.ylabel('Y-axis')
-plt.savefig(os.path.join(IMAGES_FOLDER, 'graph4.png'))
-plt.close()
-print("Graph 4 (Exponential Growth) saved.")
-
-print("Matplotlib is DONE!")"""
+    """Fetch generated code snippet from the backend based on the experiment plan."""
+    try:
+        # Send a request to the backend to generate the code
+        response = requests.post(f"{BACKEND_URL}/generate_code", json={"plan":st.session_state.streamed_text})
+        
+        if response.status_code == 200:
+            # Return the generated code as a string
+            return "\n".join(response.text.split('\n')[1:-1])
+        else:
+            st.error(f"Error: Unable to fetch code (Status code: {response.status_code})")
+            return ""
+    except Exception as e:
+        st.error(f"Error: {e}")
+        return ""
 
 def execute_code(code):
     """Executes the given Python code and captures the output."""

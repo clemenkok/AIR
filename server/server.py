@@ -77,9 +77,12 @@ class CodeRequest(BaseModel):
 async def generate_code(req: CodeRequest):
     prompt = f"""
         Generate a code experiment based on the following plan, only generate the code, no other commentary:
-        Wrap the code in 
+        Avoid generating execessive computation and CUDA.
+        Please make a simple and TRIVIAL experiment, nothing too complex. Avoid scikit learn and CUDA libraries.
+        Format the code using
         ```python
         ```
+
 
         This is the experiment plan:
         {req.plan}

@@ -1,13 +1,17 @@
 import requests
+import time
 import streamlit as st
-
 from constants import BACKEND_URL
 
-# st.set_page_config(layout="wide")
-st.session_state.streamed_text = ""
+# Initialize session state for streamed text
+if "streamed_text" not in st.session_state:
+    st.session_state.streamed_text = ""
+if "text_buffer" not in st.session_state:
+    st.session_state.text_buffer = ""
 
 def experiment_outline_frontend():
     st.session_state.setdefault('streamed_text', "")
+    st.session_state.setdefault('text_buffer', "")
 
     # Custom CSS for height and button positioning
     st.markdown("""
@@ -15,10 +19,6 @@ def experiment_outline_frontend():
             .text-area {
                 height: 70vh !important;
             }
-            # .stButton {
-            #     display: flex;
-            #     justify-content: center;
-            # }
             .stButton > button {
                 padding: 0.5em 2em;
                 font-size: 1.2rem;
@@ -33,33 +33,27 @@ def experiment_outline_frontend():
 
     st.markdown("#### Experiment Outline")
 
-    # Text Area with streamed content
-    # st.text_area(
-    #     label="Outline",
-    #     value=st.session_state.streamed_text,
-    #     placeholder="Thinking of ideas...",
-    #     key="outline_text",
-    #     height=500  # Base height to ensure the text_area expands
-    # )
+    # Text Area with streamed content (replaced with markdown display)
+    dynamic_container = st.empty()
 
-    st.markdown("""
-        <textarea id="dynamic-textarea" style="width: 100%; height: 500px;">
-        </textarea>
-    """, unsafe_allow_html=True)
+    # Initially render the content with the current streamed text
+    dynamic_container.markdown(st.session_state.streamed_text, unsafe_allow_html=True)
 
+    # Button for Regenerating the outline
     _, regen_btn, _, cont_btn, _ = st.columns([5, 4, 1, 4, 5])
 
     with regen_btn:
         if st.button("Regenerate"):
-            stream_claude_section("Regenerate")
+            stream_claude_section("Regenerate", dynamic_container)
 
     with cont_btn:
         if st.button("Continue"):
             st.session_state.experiment_outline_complete = True
-        
-def stream_claude_section(section_text):
-    # Reset the streamed text
+
+def stream_claude_section(section_text, dynamic_container):
+    # Reset the streamed text and text buffer
     st.session_state.streamed_text = ""
+    st.session_state.text_buffer = ""
 
     # Replace this with your actual Claude streaming API endpoint
     url = f"{BACKEND_URL}/generate_outline"  # Example endpoint
@@ -68,18 +62,36 @@ def stream_claude_section(section_text):
     response = requests.post(url, json=payload, stream=True)
     
     if response.status_code == 200:
+        # Temporary variable to accumulate text
+        temp_text = ""
+
+        # Stream and update the content line-by-line in the dynamic container
         for line in response.iter_lines():
             if line:
                 decoded_line = line.decode('utf-8')
-                # st.session_state.streamed_text += decoded_line
 
-                st.markdown(f"""
-                    <script>
-                        const textArea = document.getElementById('dynamic-textarea');
-                        textArea.innerHTML += `{decoded_line}`;
-                    </script>
-                """, unsafe_allow_html=True)
+                # Append the line to the text buffer
+                st.session_state.text_buffer += decoded_line + "\n"
+
+                # Markdown-compatible unique key for each update (e.g., adding a timestamp)
+                unique_key = f"experiment_outline_{time.time()}"  # Unique key based on timestamp
+
+                # Update the dynamic container with the new streamed text
+                dynamic_container.markdown(
+                    st.session_state.streamed_text + st.session_state.text_buffer, 
+                    unsafe_allow_html=True  # To allow markdown and other formatting
+                )
+
+                # Optionally, simulate a small delay to allow for smoother updates
+                time.sleep(0.2)  # You can adjust this delay based on your desired speed
+
+        # If any leftover text remains in the buffer, display it
+        if st.session_state.text_buffer:
+            st.session_state.streamed_text += st.session_state.text_buffer
+            dynamic_container.markdown(
+                st.session_state.streamed_text, 
+                unsafe_allow_html=True  # To allow markdown and other formatting
+            )
+
     else:
         st.error("Error: Unable to stream from Claude API.")
-
-# outline()
