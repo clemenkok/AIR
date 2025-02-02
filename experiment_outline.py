@@ -34,42 +34,51 @@ def experiment_outline_frontend():
     st.markdown("#### Experiment Outline")
 
     # Text Area with streamed content
-    st.text_area(
-        label="Outline",
-        value=st.session_state.streamed_text,
-        placeholder="Thinking of ideas...",
-        key="outline_text",
-        height=500  # Base height to ensure the text_area expands
-    )
+    # st.text_area(
+    #     label="Outline",
+    #     value=st.session_state.streamed_text,
+    #     placeholder="Thinking of ideas...",
+    #     key="outline_text",
+    #     height=500  # Base height to ensure the text_area expands
+    # )
 
-    # _, regen_btn, _, cont_btn, _ = st.columns([5, 4, 1, 4, 5])
+    st.markdown("""
+        <textarea id="dynamic-textarea" style="width: 100%; height: 500px;">
+        </textarea>
+    """, unsafe_allow_html=True)
 
-    # with regen_btn:
-    if st.button("Regenerate"):
-        stream_claude_section("Regenerate")
+    _, regen_btn, _, cont_btn, _ = st.columns([5, 4, 1, 4, 5])
 
-    # with cont_btn:
-    if st.button("Continue"):
-        st.session_state.experiment_outline_complete = True
-        # print(st.session_state.experiment_outline_complete)
+    with regen_btn:
+        if st.button("Regenerate"):
+            stream_claude_section("Regenerate")
+
+    with cont_btn:
+        if st.button("Continue"):
+            st.session_state.experiment_outline_complete = True
         
 def stream_claude_section(section_text):
-    # Populate the arg
-    return
-
     # Reset the streamed text
     st.session_state.streamed_text = ""
 
     # Replace this with your actual Claude streaming API endpoint
-    url = f"{BACKEND_URL}/generate_code"  # Example endpoint
+    url = f"{BACKEND_URL}/generate_outline"  # Example endpoint
     
-    response = requests.post(url, json={"plan": section_text}, stream=True)
+    payload = st.session_state.selected_paper_data
+    response = requests.post(url, json=payload, stream=True)
     
     if response.status_code == 200:
         for line in response.iter_lines():
             if line:
                 decoded_line = line.decode('utf-8')
-                st.session_state.streamed_text += decoded_line
+                # st.session_state.streamed_text += decoded_line
+
+                st.markdown(f"""
+                    <script>
+                        const textArea = document.getElementById('dynamic-textarea');
+                        textArea.innerHTML += `{decoded_line}`;
+                    </script>
+                """, unsafe_allow_html=True)
     else:
         st.error("Error: Unable to stream from Claude API.")
 
