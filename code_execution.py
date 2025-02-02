@@ -2,8 +2,8 @@ import streamlit as st
 import sys
 import io
 import os
-import matplotlib.pyplot as plt
-import numpy as np
+# import matplotlib.pyplot as plt
+# import numpy as np
 
 # Set page layout to wide
 st.set_page_config(layout="wide")

@@ -4,7 +4,6 @@ import networkx as nx
 from pyvis.network import Network
 import streamlit as st
 import json
-
 import matplotlib.pyplot as plt
 from datatypes import Node
 from semantic_scholar import find_most_relevant_paper, get_influential_papers
@@ -15,12 +14,8 @@ st.set_page_config(layout="wide")
 BASE_URL = "https://api.semanticscholar.org/graph/v1/paper/search"
 
 def build_graph(knowledge_graph: dict, start_node: Node, depth: int = 3, node_metadata=None):
-    """
-    Recursively builds a citation graph up to the specified depth.
-    Also populates a node_metadata dictionary with extra info (e.g. author, year).
-    """
+    """Recursively builds a citation graph up to the specified depth."""
     print("Building graph")
-
     if depth == 0:
         return
 
@@ -55,25 +50,18 @@ def build_graph(knowledge_graph: dict, start_node: Node, depth: int = 3, node_me
         build_graph(knowledge_graph, ref, depth - 1, node_metadata)
 
 def plot_citation_graph_streamlit(citation_dict, node_metadata):
-    """
-    Displays a citation graph using PyVis inside Streamlit with
-    author name and year on hover.
-    """
-    print("Plotting graph")
+    """Generates and stores citation graph HTML in session state for persistence."""
     G = nx.DiGraph()
-
-    # Add edges to the NetworkX graph
     for paper, citations in citation_dict.items():
         G.add_node(paper)
         for cited_paper in citations:
             G.add_node(cited_paper)
             G.add_edge(paper, cited_paper)
 
-    # Create a PyVis network
     net = Network(notebook=False, directed=True)
-
-    # Configure the network for better visuals
-    net.set_options("""
+    
+    # Configure the network
+    net.set_options(""" 
         var options = {
           "nodes": {
             "shape": "dot",
@@ -93,8 +81,8 @@ def plot_citation_graph_streamlit(citation_dict, node_metadata):
           },
           "physics": {
             "forceAtlas2Based": {
-              "gravitationalConstant": -50,
-              "springLength": 100
+              "gravitationalConstant": -150,
+              "springLength": 200
             },
             "minVelocity": 0.75,
             "solver": "forceAtlas2Based"
@@ -109,76 +97,103 @@ def plot_citation_graph_streamlit(citation_dict, node_metadata):
         abstract = meta.get("abstract", "Unknown")
         year = meta.get("year", "Unknown")
 
-        # Break abstract into chunks of 100 characters
         abstract_chunks = [abstract[i:i+100] for i in range(0, len(abstract), 100)]
         formatted_abstract = '\n'.join(abstract_chunks)
 
-        # We'll display a shorter label so it doesn't crowd the graph
         label = f"{title_text[:30]}..." if len(title_text) > 30 else title_text
-
-        # Full details on hover
-        hover_text = f"{title_text}\nAuthor: {author}\nYear: {year}\nAbstract: {formatted_abstract}\n"
+        hover_text = f"{title_text}\nAuthor: {author}\nYear: {year}\nAbstract: {formatted_abstract}..."
         net.add_node(node, label=label, title=hover_text)
 
-    # Add edges
     for edge in G.edges:
         net.add_edge(edge[0], edge[1])
 
-    # Generate the interactive graph HTML
+    # Save HTML to session state
     html_path = "citation_graph.html"
     net.write_html(html_path)
 
-    # Render the graph in Streamlit
     with open(html_path, "r", encoding="utf-8") as f:
         html_content = f.read()
-    st.components.v1.html(html_content, height=600)
+    st.session_state.citation_graph_html = html_content  # Store HTML persistently
 
-    # Add edges
-    for edge in G.edges:
-        net.add_edge(edge[0], edge[1])
-
-    # Generate the interactive graph HTML
-    html_path = "citation_graph.html"
-    net.write_html(html_path)
-
-    # Render the graph in Streamlit
-    with open(html_path, "r", encoding="utf-8") as f:
-        html_content = f.read()
-    st.components.v1.html(html_content, height=600)
+# Ensure session state is initialized
+if "selected_paper_data" not in st.session_state:
+    st.session_state.selected_paper_data = {"data": []}
+if "selected_titles" not in st.session_state:
+    st.session_state.selected_titles = []
+if "knowledge_graph" not in st.session_state:
+    st.session_state.knowledge_graph = None
+if "node_metadata" not in st.session_state:
+    st.session_state.node_metadata = None
 
 # Streamlit UI
 st.title("Knowledge Graph")
 
-# Instead of printing the JSON or dictionary above the graph, we store it silently.
-knowledge_graph = defaultdict(list)
-node_metadata = {}
-
 topic = st.text_input("Enter a research topic:", "Gaussian Splatting")
 
+# Generate Graph Button
 if st.button("Generate Graph"):
-    # Find the most relevant paper for the given topic
-    most_relevant_paper = find_most_relevant_paper(topic)
+    with st.spinner("Generating citation graph..."):
+        most_relevant_paper = find_most_relevant_paper(topic)
+        knowledge_graph = defaultdict(list)
+        node_metadata = {}
 
-    # Build the citation graph (up to depth=3)
-    build_graph(knowledge_graph, most_relevant_paper, depth=3, node_metadata=node_metadata)
+        build_graph(knowledge_graph, most_relevant_paper, depth=3, node_metadata=node_metadata)
 
-    # Optionally, if you still want to show the JSON, use an expander:
-    # with st.expander("Show Raw Citation Data"):
-    #     st.json(knowledge_graph)
+        st.session_state.knowledge_graph = knowledge_graph
+        st.session_state.node_metadata = node_metadata
 
-    # Plot the graph with PyVis
-    plot_citation_graph_streamlit(knowledge_graph, node_metadata)
-    
-# # # Streamlit UI
-# st.title("Knowledge Graph")
+        plot_citation_graph_streamlit(knowledge_graph, node_metadata)  # Generate and store graph
 
-# knowledge_graph = defaultdict(list)
-# topic = st.text_input("Enter a research topic:", "Gaussian Splatting")
+# Display the Graph If It Exists
+if "citation_graph_html" in st.session_state:
+    st.components.v1.html(st.session_state.citation_graph_html, height=600)
 
-# if st.button("Generate Graph"):
-#     most_relevant_paper = find_most_relevant_paper(topic)
-#     print(most_relevant_paper.name)
-#     build_graph(knowledge_graph, most_relevant_paper, depth=3)
-#     print(json.dumps(knowledge_graph))
-#     st.write("Knowledge Graph Built:", knowledge_graph)
-#     plot_citation_graph_streamlit(knowledge_graph)
+# Ensure graph exists before displaying paper selection
+if st.session_state.knowledge_graph and st.session_state.node_metadata:
+    st.subheader("Select Papers to View Abstracts")
+
+    paper_options = {meta["title"]: meta for meta in st.session_state.node_metadata.values()}
+
+    # Ensure default selection
+    if not st.session_state.selected_titles and paper_options:
+        st.session_state.selected_titles = [list(paper_options.keys())[0]]
+
+    # **Add logic to handle session state properly**
+    selected_titles = st.multiselect(
+        "Choose at least one paper:",
+        list(paper_options.keys()),
+        # default=st.session_state.selected_titles # CAUSES GHOSTING ERROR!
+    )
+
+    # Only update session state if the selections have changed
+    if selected_titles != st.session_state.selected_titles:
+        st.session_state.selected_titles = selected_titles  # Sync with multiselect
+
+    # Ensure deselected papers are removed
+    st.session_state.selected_paper_data["data"] = [
+        {"title": title, "abstract": paper_options[title].get("abstract", "No abstract available.")}
+        for title in selected_titles
+    ]
+
+    # Warn if no papers are selected
+    if not selected_titles:
+        st.warning("Please select at least one paper to view abstracts.")
+
+    # Make the Selected Papers Section Scrollable
+    st.subheader("Selected Papers and Abstracts")
+
+    for entry in st.session_state.selected_paper_data["data"]:
+        st.markdown(f"**{entry['title']}**")
+        st.markdown(f"**Abstract:** {entry['abstract']}")
+        st.markdown("---")
+
+    # # Display JSON representation
+    # st.subheader("Selected Papers JSON")
+    # st.json(st.session_state.selected_paper_data)
+
+    # Disable "Next" button if no papers are selected
+    next_disabled = not bool(selected_titles)
+    if st.button("Next / Generate Ideas", disabled=next_disabled):
+        st.subheader("Final Selected Papers")
+        st.write(json.dumps(st.session_state.selected_paper_data, indent=4))
+
