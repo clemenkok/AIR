@@ -14,7 +14,7 @@ def stream_claude_client(prompt: str):
     with client.messages.stream(
         model="claude-3-5-sonnet-20241022",
         max_tokens=8000,
-        temperature=0,
+        temperature=1,
         system=prompt,
         messages=[
             {
@@ -56,4 +56,32 @@ async def generate_outline(outline: Outlines):
         stream_claude_client(prompt),
         media_type="text/event-stream"
     )
+
+class CodeRequest(BaseModel):
+    plan: str
+
+@app.post("/generate_code")
+async def generate_code(req: CodeRequest):
+    prompt = f"""
+        Generate a code experiment based on the following plan, only generate the code, no other commentary:
+        Wrap the code in 
+        ```python
+        ```
+
+        This is the experiment plan:
+        {req.plan}
+
+        If any plots or images are generated, save them into the image folder such as:
+            ```
+            IMAGES_FOLDER = "generated_images"
+            ...
+            plt.savefig(os.path.join(IMAGES_FOLDER, 'graph1.png'))
+            ```
+    """
+
+    return StreamingResponse(
+        stream_claude_client(prompt),
+        media_type="text/event-stream"
+    )
+
 
